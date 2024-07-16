@@ -1,34 +1,35 @@
-import React, {  useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({data}) => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
+    email: '',
+    password: ''
   });
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const navigate = useNavigate()
+
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    data(formData.name)
-    navigate("/home")
-    // navigate("/home", {state: {username : formData.name}})
+    try {
+      const response = await axios.post('http://localhost:5000/login', formData);
+      data(response.data.username); 
+      setError('');
+      navigate("/home")
+    } catch (err) {
+      setError(err.response.data);
+    }
   };
+
   return (
-    <div className="container">
+    <div>
       <h1>Login</h1>
-      <div className="container-2">
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={changeHandler}
-          placeholder="Enter your Name"
-          required
-        />
+      <form onSubmit={handleSubmit}>
         <input
           type="email"
           name="email"
@@ -45,8 +46,10 @@ const Login = ({data}) => {
           placeholder="Password"
           required
         />
-        <button onClick={handleSubmit}>Login</button>
-      </div>
+        <button type="submit">Login</button>
+      </form>
+      <button onClick={() => navigate("/register")}>Register</button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 };
